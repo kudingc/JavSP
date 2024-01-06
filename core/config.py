@@ -241,8 +241,12 @@ def norm_tuples(cfg: Config):
     """将特定的配置转换为元组类型，便于迭代的同时也防止误修改"""
     # media_ext: 转换为全小写的.ext格式的元组
     items = cfg.File.media_ext.lower().split(';')
-    exts = [i if i.startswith('.') else '.'+i for i in items]
-    cfg.File.media_ext = tuple(exts)
+    media_exts = [i if i.startswith('.') else '.'+i for i in items]
+    cfg.File.media_ext = tuple(media_exts)
+    # sub_ext: 转换为全小写的.ext格式的元组
+    items = cfg.File.sub_ext.lower().split(';')
+    sub_exts = [i if i.startswith('.') else '.' + i for i in items]
+    cfg.File.sub_ext = tuple(sub_exts)
     # ignore_folder: 转换为元组
     items = cfg.File.ignore_folder.split(';')
     cfg.File.ignore_folder = tuple(items)

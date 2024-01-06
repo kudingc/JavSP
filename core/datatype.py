@@ -6,6 +6,8 @@ import json
 import logging
 from functools import cached_property
 
+from core.config import cfg
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from core.lib import mei_path, detect_special_attr
 
@@ -165,8 +167,13 @@ class Movie:
             new_paths.append(newpath)
         else:
             for i, fullpath in enumerate(self.files, start=1):
+                newname = ""
                 ext = os.path.splitext(fullpath)[1]
-                newpath = os.path.join(self.save_dir, self.basename + f'-CD{i}' + ext)
+                if ext in cfg.File.sub_ext:
+                    newname = self.basename + ext
+                else:
+                    newname = self.basename + f'-CD{i}' + ext
+                newpath = os.path.join(self.save_dir, newname)
                 move_file(fullpath, newpath)
                 new_paths.append(newpath)
         self.new_paths = new_paths

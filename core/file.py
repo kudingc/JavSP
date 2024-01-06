@@ -47,6 +47,7 @@ def scan_movies(root: str) -> List[Movie]:
                 cid = get_cid(fullpath)
                 # 如果文件名能匹配到cid，那么将cid视为有效id，因为此时dvdid多半是错的
                 avid = cid if cid else dvdid
+                avid = avid.upper()
                 if avid:
                     if avid in dic:
                         dic[avid].append(fullpath)
@@ -90,7 +91,7 @@ def scan_movies(root: str) -> List[Movie]:
             del dic[avid]
             continue
         # 提取分片信息（如果正则替换成功，只会剩下单个小写字符）。相关变量都要使用同样的列表生成顺序
-        basenames = [os.path.basename(i) for i in files]
+        basenames = [os.path.basename(i.lower()) for i in files]
         prefix = os.path.commonprefix(basenames)
         try:
             pattern_expr = re_escape(prefix) + r'\s*([a-z\d])\s*'
@@ -120,6 +121,23 @@ def scan_movies(root: str) -> List[Movie]:
             continue
         # 生成最终的分片信息
         mapped_files = [files[slices.index(i)] for i in sorted_slices]
+        # 扫描字幕文件
+        for dirpath, dirnames, filenames in os.walk(dirs.pop()):
+            for name in dirnames.copy():
+                if name.startswith('.') or name in cfg.File.ignore_folder:
+                    dirnames.remove(name)
+            for file in filenames:
+                ext = os.path.splitext(file)[1].lower()
+                if ext in cfg.File.sub_ext:
+                    fullpath = os.path.join(dirpath, file)
+                    dvdid = get_id(fullpath)
+                    cid = get_cid(fullpath)
+                    # 如果文件名能匹配到cid，那么将cid视为有效id，因为此时dvdid多半是错的
+                    avid = cid if cid else dvdid
+                    avid = avid.upper()
+                    if avid:
+                        if avid in dic:
+                            mapped_files.append(fullpath)
         dic[avid] = mapped_files
 
     # 汇总输出错误提示信息
